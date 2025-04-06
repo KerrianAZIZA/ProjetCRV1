@@ -1,0 +1,95 @@
+#redis-deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-master
+  labels:
+    app: redis
+    role: master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+      role: master
+  template:
+    metadata:
+      labels:
+        app: redis
+        role: master
+    spec:
+      containers:
+        - name: redis-container
+          image: redis:latest
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - mountPath: /data
+              name: redis-master-storage
+      volumes:
+        - name: redis-master-storage
+          persistentVolumeClaim:
+            claimName: redis-master-pvc
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-replica
+  labels:
+    app: redis-replica
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-replica
+  template:
+    metadata:
+      labels:
+        app: redis-replica
+    spec:
+      containers:
+        - name: redis
+          image: redis:latest
+          ports:
+            - containerPort: 6379
+          command:
+            - "redis-server"
+            - "--replicaof"
+            - "redis.default.svc.cluster.local"
+            - "6379"
+          volumeMounts:
+            - mountPath: /data
+              name: redis-replica-storage
+      volumes:
+        - name: redis-replica-storage
+          persistentVolumeClaim:
+            claimName: redis-replica-pvc
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-exporter
+  labels:
+    app: redis-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-exporter
+  template:
+    metadata:
+      labels:
+        app: redis-exporter
+    spec:
+      containers:
+        - name: redis-exporter
+          image: oliver006/redis_exporter:latest
+          ports:
+            - containerPort: 9121
+          env:
+            - name: REDIS_ADDR
+              value: "redis.default.svc.cluster.local:6379"

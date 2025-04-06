@@ -1,0 +1,14 @@
+#redis-node-frontend-service.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-redis-front-service
+spec:
+  selector:
+    app: node-redis-front
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 32337
+  type: LoadBalancer

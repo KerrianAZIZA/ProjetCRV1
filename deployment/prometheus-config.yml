@@ -1,0 +1,25 @@
+#prometheus-config.yml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+
+    scrape_configs:
+      - job_name: 'nodejs-backend'
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['node-redis.default.svc.cluster.local:8080']
+
+      - job_name: 'redis-exporter'
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['redis-exporter.default.svc.cluster.local:9121']
+
+      - job_name: 'grafana'
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['grafana.default.svc.cluster.local:3000']

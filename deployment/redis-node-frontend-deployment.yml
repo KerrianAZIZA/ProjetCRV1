@@ -1,0 +1,23 @@
+#redis-node-frontend-deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-redis-front-deployment
+  labels:
+    app: node-redis-front
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: node-redis-front
+  template:
+    metadata:
+      labels:
+        app: node-redis-front
+    spec:
+      containers:
+        - name: frontend-container
+          imagePullPolicy: IfNotPresent
+          image: keker03/react:latest
+          ports:
+            - containerPort: 8080
